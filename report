@@ -1,0 +1,90 @@
+freebase database project
+
+environment: Ubuntu LTS 14.04/Windows 10, Nginx, MySQL Ver 14.14 debian-linux-gnu (x86_64)
+
+team member: Cai Han, Qu Yanru
+
+query:
+1. Search a name, return all entities that match the name (better to rank the entities)
+2. Given an entity ID, return all types it belongs to
+3. Given an entity ID, return all properties whose schema/expected_type if one type of the entity
+4. Given an entity ID, return all objects that are co-occurred with this entity in one triple
+extra:
+5. For the name search, allow some string similarity function and some thresholds
+6. Given a type ID, return all instances of the type
+7. Given a type ID, return all others types in the same domain
+8. Given a property ID, return all object pairs that co-occurred with this property
+
+Initial Design:
+
+create TABLE Entity (
+    Entity_URI varchar(600) not null,
+    name varchar(1300),
+    PRIMARY KEY (Entity_URI)
+);
+create TABLE EntityType (
+    Entity_URI varchar(600) not null,
+    Type_URI varchar(600) not null,
+    FOREIGN KEY (Entity_URI) REFERENCES Entity (Entity_URI),
+    FOREIGN KEY (Type_URI) REFERENCES Type (Type_URI)
+);
+create TABLE Type (
+    Type_URI varchar(600) not null,
+    PRIMARY KEY (Type_URI)
+);
+create TABLE RelationProperty (
+    Property_URI varchar(600) not null,
+    "domain" varchar(600),
+    range varchar(600),
+    PRIMARY KEY (Property_URI),
+    FOREIGN KEY ("domain") REFERENCES Type (Type_URI),
+    FOREIGN KEY (range) REFERENCES Type (Type_URI)
+);
+create TABLE ValueProperty (
+    Property_URI varchar(600) not null,
+    "domain" varchar(600),
+    range varchar(600),
+    PRIMARY KEY (Property_URI),
+    FOREIGN KEY ("domain") REFERENCES Type (Type_URI)
+);
+create TABLE RelationStatement (
+    sURI varchar(600) not null,
+    pURI varchar(600) not null,
+    oURI varchar(600) not null,
+    FOREIGN KEY (oURI) REFERENCES Entity (Entity_URI),
+    FOREIGN KEY (pURI) REFERENCES RelationProperty (Property_URI),
+    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
+);
+create TABLE ValueStatement (
+    sURI varchar(600) not null,
+    pURI varchar(600) not null,
+    oValue mediumtext not null,
+    FOREIGN KEY (pURI) REFERENCES ValueProperty (Property_URI),
+    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
+);
+
+For the compatible and consistent use of the database, we setup up an Nginx server at ...
+
+Configurations:
+
+1. /etc/mysql/my.cnf:
+[mysqld]
+innodb_file_per_table
+
+This mode provides a clear view about how do each table occupy the space, what's more, this enables 'OPTIMIZE TABLE ...' command.
+The reason why we need to 'OPTIMIZE TABLE':
+Running 'OPTIMIZE TABLE' against an InnoDB table stored in the shared table-space file ibdata1 does two things:
+- Makes the table's data and indexes contiguous inside ibdata1.
+- Makes ibdata1 grow because the contiguous data and index pages are appended to ibdata1.
+But when running 'OPTIMIZE TABLE' with innodb_file_per_table enabled, this will produce a .idb file for each table.
+Thus we can see directly how much space a table occupies, and thus optimize space.
+
+2. CREATE SCHEMA `new_schema` DEFAULT CHARACTER SET utf8mb4  COLLATE utf8mb4_bin;
+We need to mention that, some characters in the data file are not valid utf8, what's more, topics are case sensitive.
+For example, there're strings like "Ð¢Ð°Ðº Ð¿Ð¾Ð·Ð½Ð°ÐºÐ¾Ð¼Ð¸Ð»Ð¸ÑÑ Ð¼Ñ"@en,
+what's more <http://rdf.freebase.com/ns/book.book_edition.ISBN> and <http://rdf.freebase.com/ns/book.book_edition.isbn> are different properties.
+
+MySQL's utf8 permits only the Unicode characters that can be represented with 3 bytes in UTF-8.
+Here the file contains characters that needs 4 bytes.
+Thus we need to change the column encoding from utf8 to utf8mb4, this encoding allows storage of characters that occupy 4 bytes in UTF-8.
+And we choose utf9mb4_bin as collate to keep the database case sensitive, both in storage and query.

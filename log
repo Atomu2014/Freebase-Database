@@ -7,5 +7,56 @@ uri max length: 559
 use: 600
 
 entity: 2777977
-type: 10308
-entity_type: 6831410
+type: 3090
+entity_type: 1619981
+
+"My soul doth magnify the Lord.  And my spirit rejoiceth in God my Saviour.  Because He hath looked down on the lowliness of His handmaid:  for behold henceforth all generations will call me blessed.  Because the Mighty One hath done great things for me:  and holy is His name.  And His mercy is from generation to generation:  on those who fear Him.  He showeth might in His arm:  He scattereth the proud in the conceit of their heart.  He casteth down the mighty from theirthrone:  and exalteth the lowly.  He filleth the hungry with good things:  and the rich He sendeth away empty.  He hath received His servant Israel:  being mindful of His mercy.  As He spake to our fathers:  to Abraham and to his seed forever."@en
+name max_len: 1251
+use: 1300
+
+
+create TABLE Entity (
+    Entity_URI varchar(600) not null,
+    name varchar(1300),
+    PRIMARY KEY (Entity_URI)
+);
+create TABLE EntityType (
+    Entity_URI varchar(600) not null,
+    Type_URI varchar(600) not null,
+    FOREIGN KEY (Entity_URI) REFERENCES Entity (Entity_URI),
+    FOREIGN KEY (Type_URI) REFERENCES Type (Type_URI)
+);
+create TABLE Type (
+    Type_URI varchar(600) not null,
+    PRIMARY KEY (Type_URI)
+);
+create TABLE RelationProperty (
+    Property_URI varchar(600) not null,
+    "domain" varchar(600),
+    range varchar(600),
+    PRIMARY KEY (Property_URI),
+    FOREIGN KEY ("domain") REFERENCES Type (Type_URI),
+    FOREIGN KEY (range) REFERENCES Type (Type_URI)
+);
+create TABLE ValueProperty (
+    Property_URI varchar(600) not null,
+    "domain" varchar(600),
+    range varchar(600),
+    PRIMARY KEY (Property_URI),
+    FOREIGN KEY ("domain") REFERENCES Type (Type_URI)
+);
+create TABLE RelationStatement (
+    sURI varchar(600) not null,
+    pURI varchar(600) not null,
+    oURI varchar(600) not null,
+    FOREIGN KEY (oURI) REFERENCES Entity (Entity_URI),
+    FOREIGN KEY (pURI) REFERENCES RelationProperty (Property_URI),
+    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
+);
+create TABLE ValueStatement (
+    sURI varchar(600) not null,
+    pURI varchar(600) not null,
+    oValue mediumtext not null,
+    FOREIGN KEY (pURI) REFERENCES ValueProperty (Property_URI),
+    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
+);
