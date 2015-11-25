@@ -88,3 +88,11 @@ MySQL's utf8 permits only the Unicode characters that can be represented with 3 
 Here the file contains characters that needs 4 bytes.
 Thus we need to change the column encoding from utf8 to utf8mb4, this encoding allows storage of characters that occupy 4 bytes in UTF-8.
 And we choose utf9mb4_bin as collate to keep the database case sensitive, both in storage and query.
+
+
+Optimization:
+
+ID, delete useless statement
+index for name, domain, range
+ranking
+search

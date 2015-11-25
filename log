@@ -60,3 +60,39 @@ create TABLE ValueStatement (
     FOREIGN KEY (pURI) REFERENCES ValueProperty (Property_URI),
     FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
 );
+
+
+create TABLE Entity (
+    Entity_ID varchar(150) not null,
+    name varchar(100),
+    PRIMARY KEY (Entity_ID)
+);
+create TABLE EntityType (
+    Entity_ID varchar(150) not null,
+    Type_URI varchar(800) not null
+);
+create TABLE RelationProperty (
+    Property_URI varchar(150) not null,
+    "domain" varchar(800),
+    range varchar(800),
+    PRIMARY KEY (Property_URI)
+);
+create TABLE RelationStatement (
+    sURI varchar(800) not null,
+    pURI varchar(300) not null,
+    oURI varchar(800) not null
+);
+create TABLE Type (
+    Type_URI varchar(800) not null
+);
+create TABLE ValueProperty (
+    Property_URI varchar(150) not null,
+    "domain" varchar(800),
+    range varchar(800),
+    PRIMARY KEY (Property_URI)
+);
+create TABLE ValueStatement (
+    sURI varchar(800) not null,
+    pURI varchar(300) not null,
+    oValue mediumtext not null
+);
