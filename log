@@ -96,3 +96,36 @@ create TABLE ValueStatement (
     pURI varchar(300) not null,
     oValue mediumtext not null
 );
+
+create TABLE `freebase`.Entity (
+Entity_ID varchar(150) not null,
+name varchar(800),
+PRIMARY KEY (Entity_ID)
+);
+create TABLE `freebase`.EntityType (
+Entity_ID varchar(150) not null,
+Type_URI varchar(800) not null
+);
+create TABLE `freebase`.Property (
+Property_URI varchar(150) not null,
+`domain` varchar(800),
+`range` varchar(800),
+PRIMARY KEY (Property_URI)
+);
+create TABLE `freebase`.RelationStatement (
+sURI varchar(800) not null,
+pURI varchar(300) not null,
+oURI varchar(800) not null
+);
+create TABLE `freebase`.Type (
+Type_URI varchar(800) not null
+);
+create TABLE `freebase`.ValueStatement (
+sURI varchar(800) not null,
+pURI varchar(300) not null,
+oValue mediumtext not null
+);
+
+type: 719   (800)
+property: 155   107     98  (160, 800, 800)
+entity type: 15 719 (50, 800)
