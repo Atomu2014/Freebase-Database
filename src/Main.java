@@ -28,7 +28,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        FirstVersion.insert_entity_type();
+        FirstVersion.insert_vstste();
     }
 
 

@@ -10,6 +10,9 @@ public class FirstVersion {
     public static String fname_type = "/media/kevin/D/database/type";
     public static String fname_property = "/media/kevin/D/database/property";
     public static String fname_entity_type = "/media/kevin/D/database/entity_type";
+    public static String fname_entity = "/media/kevin/D/database/entity";
+    public static String fname_rstate = "/media/kevin/D/database/rfreebase";
+    public static String fname_vstate = "/media/kevin/D/database/vfreebase";
 
     public static void insert_first_version_origin() {
         final int batchSize = 10000, timerSize = 100000;
@@ -184,33 +187,29 @@ public class FirstVersion {
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
             PreparedStatement t_stmt;
-            int len;
 
             @Override
             public void onPrepare(Connection conn) throws SQLException {
                 t_stmt = conn.prepareStatement("INSERT INTO Type VALUES (?)");
-                len = 0;
             }
 
             @Override
             public void onWhile(Connection conn, int nline, String line) throws SQLException {
-//                t_stmt.setString(1, line);
-//                t_stmt.addBatch();
-//
-//                if (nline % batchSize == 0) {
-//                    t_stmt.executeBatch();
-//                    conn.commit();
-//                }
-                len = Math.max(len, line.length());
+                t_stmt.setString(1, line);
+                t_stmt.addBatch();
+
+                if (nline % batchSize == 0) {
+                    t_stmt.executeBatch();
+                    conn.commit();
+                }
             }
 
             @Override
             public void onFinish(Connection conn, int nline) throws SQLException {
-//                if (nline % batchSize != 0) {
-//                    t_stmt.executeBatch();
-//                    conn.commit();
-//                }
-                System.out.println(len);
+                if (nline % batchSize != 0) {
+                    t_stmt.executeBatch();
+                    conn.commit();
+                }
             }
         });
         reader.read(fname_type, Main.url);
@@ -220,23 +219,44 @@ public class FirstVersion {
         final int batchSize = 10000, timerSize = 100000;
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
-            PreparedStatement p_stmt;
+            PreparedStatement p_stmt, pd_stmt, pr_stmt, pdr_stmt;
 
             @Override
             public void onPrepare(Connection conn) throws SQLException, IOException {
-                p_stmt = conn.prepareStatement("INSERT INTO Property VALUES (?, ?, ?)");
+                p_stmt = conn.prepareStatement("INSERT INTO Property(Property_URI) VALUES (?)");
+                pd_stmt = conn.prepareStatement("INSERT INTO Property(Property_URI, `domain`) VALUES (?, ?)");
+                pr_stmt = conn.prepareStatement("INSERT INTO Property(Property_URI, `range`) VALUES (?, ?)");
+                pdr_stmt = conn.prepareStatement("INSERT INTO Property VALUES (?, ?, ?)");
             }
 
             @Override
             public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
                 String[] uris = line.split("\t");
-                p_stmt.setString(1, uris[0]);
-                p_stmt.setString(2, uris[1]);
-                p_stmt.setString(3, uris[2]);
-                p_stmt.addBatch();
+                if (uris[1].equals("null")){
+                    if (uris[2].equals("null")){
+                        p_stmt.setString(1, uris[0]);
+                        p_stmt.addBatch();
+                    } else {
+                        pr_stmt.setString(1, uris[0]);
+                        pr_stmt.setString(2, uris[2]);
+                        pr_stmt.addBatch();
+                    }
+                } else if (uris[2].equals("null")){
+                    pd_stmt.setString(1, uris[0]);
+                    pd_stmt.setString(2, uris[1]);
+                    pd_stmt.executeBatch();
+                } else {
+                    pdr_stmt.setString(1, uris[0]);
+                    pdr_stmt.setString(2, uris[1]);
+                    pdr_stmt.setString(3, uris[2]);
+                    pdr_stmt.addBatch();
+                }
 
                 if (nline % batchSize == 0) {
                     p_stmt.executeBatch();
+                    pd_stmt.executeBatch();
+                    pr_stmt.executeBatch();
+                    pdr_stmt.executeBatch();
                     conn.commit();
                 }
             }
@@ -245,6 +265,9 @@ public class FirstVersion {
             public void onFinish(Connection conn, int nline) throws SQLException, IOException {
                 if (nline % batchSize != 0) {
                     p_stmt.executeBatch();
+                    pd_stmt.executeBatch();
+                    pr_stmt.executeBatch();
+                    pdr_stmt.executeBatch();
                     conn.commit();
                 }
             }
@@ -257,7 +280,6 @@ public class FirstVersion {
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
             PreparedStatement et_stmt;
-            int len1 = 0, len2 = 0;
 
             @Override
             public void onPrepare(Connection conn) throws SQLException, IOException {
@@ -267,8 +289,6 @@ public class FirstVersion {
             @Override
             public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
                 String[] uris = line.split("\t");
-//                len1 = Math.max(len1, uris[0].length());
-//                len2 = Math.max(len2, uris[1].length());
 
                 et_stmt.setString(1, uris[0]);
                 et_stmt.setString(2, uris[1]);
@@ -286,11 +306,127 @@ public class FirstVersion {
                     et_stmt.executeBatch();
                     conn.commit();
                 }
-//                System.out.println(len1);
-//                System.out.println(len2);
             }
         });
         reader.read(fname_entity_type, Main.url);
 
+    }
+
+    public static void insert_entity(){
+        final int batchSize = 10000, timerSize = 1000000;
+
+        FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
+            PreparedStatement e_stmt, en_stmt;
+
+            @Override
+            public void onPrepare(Connection conn) throws SQLException, IOException {
+                e_stmt = conn.prepareStatement("INSERT INTO Entity(Entity_ID) VALUES (?)");
+                en_stmt = conn.prepareStatement("INSERT INTO Entity VALUES (?, ?)");
+            }
+
+            @Override
+            public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
+                String[] uris = line.split("\t");
+                if (uris.length > 1){
+                    en_stmt.setString(1, uris[0]);
+                    en_stmt.setString(2, uris[1]);
+                    en_stmt.addBatch();
+                } else {
+                    e_stmt.setString(1, uris[0]);
+                    e_stmt.addBatch();
+                }
+
+                if (nline % batchSize == 0){
+                    e_stmt.executeBatch();
+                    en_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+
+            @Override
+            public void onFinish(Connection conn, int nline) throws SQLException, IOException {
+                if (nline % batchSize != 0){
+                    e_stmt.executeBatch();
+                    en_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+        });
+
+        reader.read(fname_entity, Main.url);
+    }
+
+    public static void insert_rstste(){
+        final int batchSize = 10000, timerSize = 1000000;
+
+        FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
+            PreparedStatement rs_stmt;
+
+            @Override
+            public void onPrepare(Connection conn) throws SQLException, IOException {
+                rs_stmt = conn.prepareStatement("INSERT INTO RelationStatement VALUES (?, ?, ?)");
+            }
+
+            @Override
+            public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
+                String[] uris = line.split("\t");
+                rs_stmt.setString(1, uris[0]);
+                rs_stmt.setString(2, uris[1]);
+                rs_stmt.setString(3, uris[2]);
+                rs_stmt.addBatch();
+
+                if (nline % batchSize == 0){
+                    rs_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+
+            @Override
+            public void onFinish(Connection conn, int nline) throws SQLException, IOException {
+                if (nline % batchSize != 0){
+                    rs_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+        });
+
+        reader.read(fname_rstate, Main.url);
+    }
+
+    public static void insert_vstste(){
+        final int batchSize = 10000, timerSize = 1000000;
+
+        FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
+            PreparedStatement vs_stmt;
+
+            @Override
+            public void onPrepare(Connection conn) throws SQLException, IOException {
+                vs_stmt = conn.prepareStatement("INSERT INTO ValueStatement VALUES (?, ?, ?)");
+            }
+
+            @Override
+            public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
+                String[] uris = line.split("\t");
+                vs_stmt.setString(1, uris[0]);
+                vs_stmt.setString(2, uris[1]);
+                vs_stmt.setString(3, uris[2]);
+                vs_stmt.addBatch();
+
+                if (nline % batchSize == 0){
+                    vs_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+
+            @Override
+            public void onFinish(Connection conn, int nline) throws SQLException, IOException {
+                if (nline % batchSize != 0){
+                    vs_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+        });
+
+        reader.read(fname_vstate, Main.url);
     }
 }
