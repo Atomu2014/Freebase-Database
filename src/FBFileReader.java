@@ -25,6 +25,7 @@ public class FBFileReader {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fname), "utf-8"));
             Class.forName("com.mysql.jdbc.Driver");
 
+//            Connection conn = DriverManager.getConnection(dbpath, "qyr", "qyr123456");
             Connection conn = DriverManager.getConnection(dbpath, "root", "Kevin2015");
             conn.setAutoCommit(false);
 

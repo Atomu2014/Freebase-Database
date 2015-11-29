@@ -14,6 +14,7 @@ void split(string line){
 		if (line[i] == '\t'){
 			entity = line.substr(0, i);
 			tmp = i+1;
+			break;
 		}
 	}
 	name = line.substr(tmp, line.length()-tmp);

@@ -3,9 +3,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- * Created by kevin on 15-11-26.
- */
 public class FirstVersion {
     public static String fname_type = "/media/kevin/D/database/type";
     public static String fname_property = "/media/kevin/D/database/property";
@@ -232,8 +229,8 @@ public class FirstVersion {
             @Override
             public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
                 String[] uris = line.split("\t");
-                if (uris[1].equals("null")){
-                    if (uris[2].equals("null")){
+                if (uris[1].equals("null")) {
+                    if (uris[2].equals("null")) {
                         p_stmt.setString(1, uris[0]);
                         p_stmt.addBatch();
                     } else {
@@ -241,7 +238,7 @@ public class FirstVersion {
                         pr_stmt.setString(2, uris[2]);
                         pr_stmt.addBatch();
                     }
-                } else if (uris[2].equals("null")){
+                } else if (uris[2].equals("null")) {
                     pd_stmt.setString(1, uris[0]);
                     pd_stmt.setString(2, uris[1]);
                     pd_stmt.executeBatch();
@@ -312,7 +309,7 @@ public class FirstVersion {
 
     }
 
-    public static void insert_entity(){
+    public static void insert_entity() {
         final int batchSize = 10000, timerSize = 1000000;
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
@@ -327,7 +324,7 @@ public class FirstVersion {
             @Override
             public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
                 String[] uris = line.split("\t");
-                if (uris.length > 1){
+                if (uris.length > 1) {
                     en_stmt.setString(1, uris[0]);
                     en_stmt.setString(2, uris[1]);
                     en_stmt.addBatch();
@@ -336,7 +333,7 @@ public class FirstVersion {
                     e_stmt.addBatch();
                 }
 
-                if (nline % batchSize == 0){
+                if (nline % batchSize == 0) {
                     e_stmt.executeBatch();
                     en_stmt.executeBatch();
                     conn.commit();
@@ -345,7 +342,7 @@ public class FirstVersion {
 
             @Override
             public void onFinish(Connection conn, int nline) throws SQLException, IOException {
-                if (nline % batchSize != 0){
+                if (nline % batchSize != 0) {
                     e_stmt.executeBatch();
                     en_stmt.executeBatch();
                     conn.commit();
@@ -356,7 +353,7 @@ public class FirstVersion {
         reader.read(fname_entity, Main.url);
     }
 
-    public static void insert_rstste(){
+    public static void insert_rstste() {
         final int batchSize = 10000, timerSize = 1000000;
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
@@ -375,7 +372,7 @@ public class FirstVersion {
                 rs_stmt.setString(3, uris[2]);
                 rs_stmt.addBatch();
 
-                if (nline % batchSize == 0){
+                if (nline % batchSize == 0) {
                     rs_stmt.executeBatch();
                     conn.commit();
                 }
@@ -383,7 +380,7 @@ public class FirstVersion {
 
             @Override
             public void onFinish(Connection conn, int nline) throws SQLException, IOException {
-                if (nline % batchSize != 0){
+                if (nline % batchSize != 0) {
                     rs_stmt.executeBatch();
                     conn.commit();
                 }
@@ -393,7 +390,7 @@ public class FirstVersion {
         reader.read(fname_rstate, Main.url);
     }
 
-    public static void insert_vstste(){
+    public static void insert_vstste() {
         final int batchSize = 10000, timerSize = 1000000;
 
         FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
@@ -412,7 +409,7 @@ public class FirstVersion {
                 vs_stmt.setString(3, uris[2]);
                 vs_stmt.addBatch();
 
-                if (nline % batchSize == 0){
+                if (nline % batchSize == 0) {
                     vs_stmt.executeBatch();
                     conn.commit();
                 }
@@ -420,7 +417,7 @@ public class FirstVersion {
 
             @Override
             public void onFinish(Connection conn, int nline) throws SQLException, IOException {
-                if (nline % batchSize != 0){
+                if (nline % batchSize != 0) {
                     vs_stmt.executeBatch();
                     conn.commit();
                 }
