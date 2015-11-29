@@ -44,8 +44,14 @@ public class Main {
 //        SecondVersion.insert_property();
 //        System.out.println("type");
 //        SecondVersion.insert_type();
-        System.out.println("entity type");
-        SecondVersion.insert_entity_type();
+//        System.out.println("entity type");
+//        SecondVersion.insert_entity_type();
+        System.out.println("entity");
+        SecondVersion.insert_entity();
+        System.out.println("fff");
+        SecondVersion.insert_fff();
+        System.out.println("ffn");
+        SecondVersion.insert_ffn();
     }
 
 

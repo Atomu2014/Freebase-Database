@@ -13,6 +13,7 @@ public class SecondVersion {
     public static String fname_ffn = "/media/kevin/D/database/freebase_ffn_2";
     public static String fname_fnf = "/media/kevin/D/database/freebase_fnf_2";
     public static String fname_fnn = "/media/kevin/D/database/freebase_fnn_2";
+    public static String fname_id_map = "/media/kevin/D/database/idMap";
     public static int batchSize = 10000, timerSize = 1000000;
 
     public static void insert_type() {
@@ -322,5 +323,38 @@ public class SecondVersion {
             }
         });
         reader.read(fname_fnn, Main.url);
+    }
+
+    public static void insert_id_map() {
+        FBFileReader reader = new FBFileReader(timerSize, new onProcessListener() {
+            PreparedStatement id_stmt;
+
+            @Override
+            public void onPrepare(Connection conn) throws SQLException, IOException {
+                id_stmt = conn.prepareStatement("INSERT INTO idMap VALUES (?, ?)");
+            }
+
+            @Override
+            public void onWhile(Connection conn, int nline, String line) throws SQLException, IOException {
+                String[] uris = line.split("\t");
+                id_stmt.setInt(1, Integer.parseInt(uris[1]));
+                id_stmt.setString(2, uris[0]);
+                id_stmt.addBatch();
+
+                if (nline % batchSize == 0){
+                    id_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+
+            @Override
+            public void onFinish(Connection conn, int nline) throws SQLException, IOException {
+                if (nline % batchSize != 0){
+                    id_stmt.executeBatch();
+                    conn.commit();
+                }
+            }
+        });
+        reader.read(fname_id_map, Main.url);
     }
 }
