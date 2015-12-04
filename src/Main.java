@@ -7,7 +7,7 @@ public class Main {
     public static String fname = "/media/kevin/D/database/sub-freebase";
     //    public static String url = "jdbc:mysql://172.16.2.62:3306/freebase?useServerPrepStmts=false&rewriteBatchedStatements=true&characterEncoding=utf8";
     public static String url = "jdbc:mysql://localhost:3306/freebase?useServerPrepStmts=false&rewriteBatchedStatements=true&characterEncoding=utf8";
-    public static String test_url = "jdbc:mysql://172.16.2.62:3306/new_schema?useServerPrepStmts=false&rewriteBatchedStatements=true&characterEncoding=utf8";
+    public static String test_url = "jdbc:mysql://localhost:3306/test?useServerPrepStmts=false&rewriteBatchedStatements=true&characterEncoding=utf8";
 
     private static void test_innodb_file_per_table() {
         try {
@@ -15,11 +15,14 @@ public class Main {
             Connection conn = DriverManager.getConnection(test_url, "root", "Kevin2015");
             conn.setAutoCommit(true);
 
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO new_table VALUES (?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table_1 VALUES (?)");
+            PreparedStatement stmt_2 = conn.prepareStatement("INSERT INTO test_table_2 VALUES (?)");
 
-            for (int i = 0; i < 1000000; ++i) {
+            for (int i = 0; i < 10000; ++i) {
                 stmt.setInt(1, i);
+                stmt_2.setString(1, "" + i);
                 stmt.executeUpdate();
+                stmt_2.executeUpdate();
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -46,12 +49,15 @@ public class Main {
 //        SecondVersion.insert_type();
 //        System.out.println("entity type");
 //        SecondVersion.insert_entity_type();
-        System.out.println("entity");
-        SecondVersion.insert_entity();
-        System.out.println("fff");
-        SecondVersion.insert_fff();
-        System.out.println("ffn");
-        SecondVersion.insert_ffn();
+//        System.out.println("entity");
+//        SecondVersion.insert_entity();
+//        System.out.println("fff");
+//        SecondVersion.insert_fff();
+//        System.out.println("ffn");
+//        SecondVersion.insert_ffn();
+
+        System.out.println("query 1");
+        FirstVersionTest.test1();
     }
 
 

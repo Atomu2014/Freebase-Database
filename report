@@ -18,50 +18,7 @@ extra:
 Initial Design:
 
 create TABLE Entity (
-    Entity_URI varchar(600) not null,
-    name varchar(1300),
-    PRIMARY KEY (Entity_URI)
-);
-create TABLE EntityType (
-    Entity_URI varchar(600) not null,
-    Type_URI varchar(600) not null,
-    FOREIGN KEY (Entity_URI) REFERENCES Entity (Entity_URI),
-    FOREIGN KEY (Type_URI) REFERENCES Type (Type_URI)
-);
-create TABLE Type (
-    Type_URI varchar(600) not null,
-    PRIMARY KEY (Type_URI)
-);
-create TABLE RelationProperty (
-    Property_URI varchar(600) not null,
-    "domain" varchar(600),
-    range varchar(600),
-    PRIMARY KEY (Property_URI),
-    FOREIGN KEY ("domain") REFERENCES Type (Type_URI),
-    FOREIGN KEY (range) REFERENCES Type (Type_URI)
-);
-create TABLE ValueProperty (
-    Property_URI varchar(600) not null,
-    "domain" varchar(600),
-    range varchar(600),
-    PRIMARY KEY (Property_URI),
-    FOREIGN KEY ("domain") REFERENCES Type (Type_URI)
-);
-create TABLE RelationStatement (
-    sURI varchar(600) not null,
-    pURI varchar(600) not null,
-    oURI varchar(600) not null,
-    FOREIGN KEY (oURI) REFERENCES Entity (Entity_URI),
-    FOREIGN KEY (pURI) REFERENCES RelationProperty (Property_URI),
-    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
-);
-create TABLE ValueStatement (
-    sURI varchar(600) not null,
-    pURI varchar(600) not null,
-    oValue mediumtext not null,
-    FOREIGN KEY (pURI) REFERENCES ValueProperty (Property_URI),
-    FOREIGN KEY (sURI) REFERENCES Entity (Entity_URI)
-);
+......
 
 For the compatible and consistent use of the database, we setup up an Nginx server at ...
 
@@ -96,3 +53,15 @@ ID, delete useless statement
 index for name, domain, range
 ranking
 search
+
+
+Second version storage use before index:
+-rw-rw---- 1 mysql mysql 6.2G 11月 30 12:07 Entity.ibd
+-rw-rw---- 1 mysql mysql 8.9G 11月 29 19:51 EntityType.ibd
+-rw-rw---- 1 mysql mysql  35G 11月 29 22:23 FFF_Statement.ibd
+-rw-rw---- 1 mysql mysql 112G 11月 30 12:21 FFN_Statement.ibd
+-rw-rw---- 1 mysql mysql  27G 11月 30 00:59 FNF_Statement.ibd
+-rw-rw---- 1 mysql mysql  28G 11月 30 05:11 FNN_Statement.ibd
+-rw-rw---- 1 mysql mysql 5.0G 11月 29 20:30 idMap.ibd
+-rw-rw---- 1 mysql mysql  13M 11月 30 12:38 Property.ibd
+-rw-rw---- 1 mysql mysql  10M 11月 30 12:42 Type.ibd
